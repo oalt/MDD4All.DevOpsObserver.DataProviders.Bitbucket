@@ -67,6 +67,7 @@ namespace MDD4All.DevOpsObserver.DataProviders.Bitbucket
                             Branch = devOpsObservable.RepositoryBranch,
                             Alias = devOpsObservable.Alias,
                             GitServerType = "Bitbucket",
+                        
                         };
                         result.Add(devOpsStatusInformation);
                     }
@@ -87,6 +88,7 @@ namespace MDD4All.DevOpsObserver.DataProviders.Bitbucket
             result.ShortName = statusValue.Repository.Name.ToString();
             result.BuildNumber = statusValue.BuildNumber;
             result.BuildTime = statusValue.CreatedOn;
+            result.ID = statusValue.Repository.Uuid;
             
             if (statusValue.State != null && statusValue.State.Name == "IN_PROGRESS")
             {
