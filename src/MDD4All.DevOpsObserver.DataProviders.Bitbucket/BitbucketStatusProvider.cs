@@ -44,34 +44,48 @@ namespace MDD4All.DevOpsObserver.DataProviders.Bitbucket
 
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", 
                                                                                                       base64EncodedAuthenticationString);
-
-                HttpResponseMessage response = await _httpClient.SendAsync(request);
-                HttpStatusCode responseStatusCode = response.StatusCode;
-
-                if (responseStatusCode == HttpStatusCode.OK)
+                try
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    PipelineDataResponse pipelineDataResponse = JsonConvert.DeserializeObject<PipelineDataResponse>(responseBody);
+                    HttpResponseMessage response = await _httpClient.SendAsync(request);
+                    HttpStatusCode responseStatusCode = response.StatusCode;
 
-                    if (pipelineDataResponse != null && pipelineDataResponse.Values.Count > 0)
+                    if (responseStatusCode == HttpStatusCode.OK)
                     {
-                        DevOpsStatusInformation devOpsStatusInformation = ConvertPipelineResponseToStatus(pipelineDataResponse.Values[0]);
-                        devOpsStatusInformation.Alias = devOpsObservable.Alias;
-                        result.Add(devOpsStatusInformation);
-                    }
-                    else
-                    {
-                        DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        PipelineDataResponse pipelineDataResponse = JsonConvert.DeserializeObject<PipelineDataResponse>(responseBody);
+
+                        if (pipelineDataResponse != null && pipelineDataResponse.Values.Count > 0)
                         {
-                            RepositoryName = devOpsObservable.RepositoryName,
-                            Branch = devOpsObservable.RepositoryBranch,
-                            Alias = devOpsObservable.Alias,
-                            GitServerType = "Bitbucket",
-                        
-                        };
-                        result.Add(devOpsStatusInformation);
-                    }
+                            DevOpsStatusInformation devOpsStatusInformation = ConvertPipelineResponseToStatus(pipelineDataResponse.Values[0]);
+                            devOpsStatusInformation.Alias = devOpsObservable.Alias;
+                            result.Add(devOpsStatusInformation);
+                        }
+                        else
+                        {
+                            DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
+                            {
+                                RepositoryName = devOpsObservable.RepositoryName,
+                                Branch = devOpsObservable.RepositoryBranch,
+                                Alias = devOpsObservable.Alias,
+                                GitServerType = "Bitbucket",
 
+                            };
+                            result.Add(devOpsStatusInformation);
+                        }
+
+                    }
+                }
+                catch (Exception exception)
+                {
+                    DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
+                    {
+                        RepositoryName = devOpsObservable.RepositoryName,
+                        Branch = devOpsObservable.RepositoryBranch,
+                        Alias = devOpsObservable.Alias,
+                        GitServerType = "Bitbucket",
+
+                    };
+                    result.Add(devOpsStatusInformation);
                 }
             }
 
