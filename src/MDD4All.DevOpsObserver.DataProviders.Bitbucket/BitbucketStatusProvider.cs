@@ -62,34 +62,35 @@ namespace MDD4All.DevOpsObserver.DataProviders.Bitbucket
                         }
                         else
                         {
-                            DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
-                            {
-                                RepositoryName = devOpsObservable.RepositoryName,
-                                Branch = devOpsObservable.RepositoryBranch,
-                                Alias = devOpsObservable.Alias,
-                                GitServerType = "Bitbucket",
-
-                            };
-                            result.Add(devOpsStatusInformation);
+                            CreateUnknownStateData(result, devOpsObservable);
                         }
 
+                    }
+                    else
+                    {
+                        CreateUnknownStateData(result, devOpsObservable);
                     }
                 }
                 catch (Exception exception)
                 {
-                    DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
-                    {
-                        RepositoryName = devOpsObservable.RepositoryName,
-                        Branch = devOpsObservable.RepositoryBranch,
-                        Alias = devOpsObservable.Alias,
-                        GitServerType = "Bitbucket",
-
-                    };
-                    result.Add(devOpsStatusInformation);
+                    CreateUnknownStateData(result, devOpsObservable);
                 }
             }
 
             return result;
+        }
+
+        private void CreateUnknownStateData(List<DevOpsStatusInformation> result, DevOpsObservable devOpsObservable)
+        {
+            DevOpsStatusInformation devOpsStatusInformation = new DevOpsStatusInformation
+            {
+                RepositoryName = devOpsObservable.RepositoryName,
+                Branch = devOpsObservable.RepositoryBranch,
+                Alias = devOpsObservable.Alias,
+                GitServerType = "Bitbucket",
+
+            };
+            result.Add(devOpsStatusInformation);
         }
 
         private DevOpsStatusInformation ConvertPipelineResponseToStatus(Value statusValue)
@@ -106,22 +107,22 @@ namespace MDD4All.DevOpsObserver.DataProviders.Bitbucket
             
             if (statusValue.State != null && statusValue.State.Name == "IN_PROGRESS")
             {
-                result.Status = DevOpsStatus.InProgress;
+                result.StatusValue = DevOpsStatus.InProgress;
             }
             else if (statusValue.State != null && statusValue.State.Name == "COMPLETED")
             {
                 if (statusValue.State.Result != null && statusValue.State.Result.Name == "SUCCESSFUL")
                 {
-                    result.Status = DevOpsStatus.Success;
+                    result.StatusValue = DevOpsStatus.Success;
                     result.LastSeenSuccessfulBuild = DateTime.Now;
                 }
                 else if (statusValue.State.Result != null && statusValue.State.Result.Name == "FAILED")
                 {
-                    result.Status = DevOpsStatus.Fail;
+                    result.StatusValue = DevOpsStatus.Fail;
                 }
                 else if (statusValue.State.Result != null && statusValue.State.Result.Name == "ERROR")
                 {
-                    result.Status = DevOpsStatus.Error;
+                    result.StatusValue = DevOpsStatus.Error;
                 }
             }
 
